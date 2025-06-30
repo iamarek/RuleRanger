@@ -6,6 +6,7 @@ type ButtonTypes = {
   size: "big" | "regular";
   iconLeft?: ReactElement;
   iconRight?: ReactElement;
+  onClick?: () => void;
 };
 
 const Button = ({
@@ -14,6 +15,7 @@ const Button = ({
   iconLeft,
   iconRight,
   children,
+  onClick,
 }: PropsWithChildren<ButtonTypes>) => {
   const sizeClassMap: Record<ButtonTypes["size"], string> = {
     big: "px-5 py-3 text-base font-medium",
@@ -31,6 +33,7 @@ const Button = ({
       className={` flex items-center gap-2 ${sizeClassMap[size]} ${variantClassMap[variant]}`}
       tabIndex={0}
       aria-label="button"
+      onClick={onClick}
     >
       {iconLeft && (
         <TablerIcon

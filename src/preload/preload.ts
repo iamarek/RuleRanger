@@ -17,4 +17,21 @@ contextBridge.exposeInMainWorld("api", {
   > => {
     return ipcRenderer.invoke("find-git-repos");
   },
+  getUserPreferences: async (): Promise<{
+    directories: string[];
+    allowFullAccess: boolean;
+    onboardingCompletedAt: string | null;
+  }> => {
+    return ipcRenderer.invoke("get-user-preferences");
+  },
+  setUserPreferences: async (prefs: {
+    directories: string[];
+    allowFullAccess: boolean;
+    onboardingCompletedAt: string | null;
+  }): Promise<boolean> => {
+    return ipcRenderer.invoke("set-user-preferences", prefs);
+  },
+  selectDirectory: async (): Promise<string | null> => {
+    return ipcRenderer.invoke("select-directory");
+  },
 });

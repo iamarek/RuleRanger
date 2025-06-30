@@ -5,7 +5,6 @@ import TablerIcon from "../TablerIcon/TablerIcon";
 import { useLocation } from "react-router-dom";
 import {
   IconFolder,
-  IconPlus,
   IconChevronDown,
   IconChevronRight,
   IconTemplate,

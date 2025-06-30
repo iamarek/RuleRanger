@@ -20,6 +20,17 @@ declare global {
     api: {
       readDir: (dirPath: string) => Promise<ReadDirResult>;
       findGitRepos: () => Promise<GitRepo[]>;
+      selectDirectory: () => Promise<string | null>;
+      getUserPreferences: () => Promise<{
+        directories: string[];
+        allowFullAccess: boolean;
+        onboardingCompletedAt: string | null;
+      }>;
+      setUserPreferences: (prefs: {
+        directories: string[];
+        allowFullAccess: boolean;
+        onboardingCompletedAt: string | null;
+      }) => Promise<boolean>;
     };
   }
 }

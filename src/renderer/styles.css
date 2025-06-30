@@ -2,12 +2,16 @@
 @import "tailwindcss"; 
 
 @theme {
+    --color-gray-lightest: #E9EAEB;
     --color-gray-light: #D5D7DA;
+    --color-gray-normal: #999FAC;
     --color-gray-medium: #535862;
     --color-gray-dark: #181D27;
     --color-gray-darkest: #252826;
     --color-gray-text: #414651;
     --color-gray-text-dark: #191919;
+    --color-green-brand-light: #DCEFE1;
+    --color-green-brand-dark: #297F47;
 }
 
 html, body {
@@ -52,4 +56,8 @@ html, body {
     0px 1px 2px 0px rgba(10, 13, 18, 0.05),
     0px 0px 0px 4px rgba(0,0,0,0.05);
   outline: none;
+}
+
+.shadow-card {
+  box-shadow: 0px 12px 16px -4px rgba(10, 13, 18, 0.08);
 }

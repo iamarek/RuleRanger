@@ -5,7 +5,7 @@ import Header from "../../components/Header/Header";
 const DefaultLayout = ({ children }: PropsWithChildren) => {
   return (
     <div
-      className="grid min-h-screen grid-cols-[310px_1fr] grid-rows-[90px_1fr] gap-0"
+      className="grid min-h-screen grid-cols-[300px_1fr] grid-rows-[90px_1fr] gap-0"
       style={{ gridTemplateAreas: '"sidebar header" "sidebar main"' }}
     >
       <aside

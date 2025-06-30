@@ -1,4 +1,10 @@
-import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  IpcMainInvokeEvent,
+  dialog,
+} from "electron";
 import * as path from "path";
 import * as fs from "fs/promises";
 import * as os from "os";
@@ -144,4 +150,63 @@ const findGitRepos = async (
 ipcMain.handle("find-git-repos", async () => {
   const homeDir = os.homedir();
   return findGitRepos(homeDir);
+});
+
+// --- User Preferences Types and Helpers ---
+type UserPreferences = {
+  directories: string[];
+  allowFullAccess: boolean;
+  onboardingCompletedAt: string | null;
+  // Add more fields as needed
+};
+
+const getPreferencesPath = (): string => {
+  return path.join(app.getPath("userData"), "user-preferences.json");
+};
+
+const readUserPreferences = async (): Promise<UserPreferences> => {
+  const prefPath = getPreferencesPath();
+  try {
+    const data = await fs.readFile(prefPath, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    // Return defaults if not found or error
+    return {
+      directories: [],
+      allowFullAccess: false,
+      onboardingCompletedAt: null,
+    };
+  }
+};
+
+const writeUserPreferences = async (prefs: UserPreferences): Promise<void> => {
+  const prefPath = getPreferencesPath();
+  await fs.writeFile(prefPath, JSON.stringify(prefs, null, 2), "utf-8");
+};
+
+ipcMain.handle("get-user-preferences", async () => {
+  return readUserPreferences();
+});
+ipcMain.handle(
+  "set-user-preferences",
+  async (_event, prefs: UserPreferences) => {
+    await writeUserPreferences(prefs);
+    return true;
+  }
+);
+
+ipcMain.handle("select-directory", async () => {
+  if (!mainWindow) return null;
+
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openDirectory"],
+    title: "Select Projects Directory",
+    message: "Choose the directory where your projects are located",
+  });
+
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+
+  return result.filePaths[0];
 });

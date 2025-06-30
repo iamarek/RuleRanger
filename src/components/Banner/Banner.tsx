@@ -10,7 +10,7 @@ type BannerProps = PropsWithChildren<{
 const Banner = ({ children, title, description }: BannerProps) => {
   return (
     <div
-      className="px-10 py-9 bg-cover bg-center min-h-[270px] mr-5 -mb-[110px]"
+      className="px-10 py-9 bg-cover bg-center min-h-[270px] mr-5 -mb-[140px]"
       style={{ backgroundImage: "url(/mesh-gradient.jpg)" }}
     >
       <Heading variant="h1">{title}</Heading>

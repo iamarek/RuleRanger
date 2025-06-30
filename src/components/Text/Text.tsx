@@ -1,11 +1,12 @@
 import { PropsWithChildren } from "react";
 
-export type TextSize = "tiny" | "small" | "medium" | "regular";
+export type TextSize = "tiny" | "small" | "medium" | "regular" | "large";
 
 type TextProps = {
   span?: boolean;
   size?: TextSize;
   className?: string;
+  color?: string;
 };
 
 const sizeClassMap: Record<TextSize, string> = {
@@ -13,15 +14,17 @@ const sizeClassMap: Record<TextSize, string> = {
   small: "text-xs",
   regular: "text-sm",
   medium: "text-base",
+  large: "text-md",
 };
 
 const Text = ({
   children,
   span,
   size = "regular",
+  color = "text-gray-medium",
   className,
 }: PropsWithChildren<TextProps>) => {
-  const textClassName = `${sizeClassMap[size]} text-gray-medium`;
+  const textClassName = `${sizeClassMap[size]} ${color}`;
   if (span) {
     return <span className={`${textClassName} ${className}`}>{children}</span>;
   }
