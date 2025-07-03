@@ -12,12 +12,7 @@ import {
   IconWorldStar,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
-
-const projects = [
-  { name: "9admin", to: "/projects/9admin" },
-  { name: "9app", to: "/projects/9app" },
-  { name: "Portfolio_2023", to: "/projects/Portfolio_2023" },
-];
+import { useUserPreferences } from "../../renderer/useUserPreferences";
 
 const templates = [
   { name: "Template 1", to: "/templates/template1" },
@@ -32,6 +27,7 @@ interface NavLinkItem {
   name: string;
   to: string;
   icon?: JSX.Element;
+  favicon?: string;
 }
 
 interface NavSectionItem {
@@ -43,43 +39,6 @@ interface NavSectionItem {
 }
 
 type NavItem = NavLinkItem | NavSectionItem;
-
-const navigation: NavItem[] = [
-  {
-    type: "link",
-    name: "Home",
-    to: "/",
-    icon: <TablerIcon icon={<IconHome />} size="small" />,
-  },
-  {
-    type: "link",
-    name: "Global rules",
-    to: "/global-rules",
-    icon: <TablerIcon icon={<IconWorldStar />} size="small" />,
-  },
-  {
-    type: "section",
-    name: "Projects",
-    icon: <TablerIcon icon={<IconFolder />} size="small" />,
-    sectionKey: "projects",
-    children: projects.map((project) => ({
-      type: "link",
-      name: project.name,
-      to: project.to,
-    })),
-  },
-  {
-    type: "section",
-    name: "Templates",
-    icon: <TablerIcon icon={<IconTemplate />} size="small" />,
-    sectionKey: "templates",
-    children: templates.map((template) => ({
-      type: "link",
-      name: template.name,
-      to: template.to,
-    })),
-  },
-];
 
 // --- SUB-COMPONENTS ---
 
@@ -156,7 +115,7 @@ const SidebarSection: FC<SidebarSectionProps> = ({
           <Link
             to={child.to}
             key={child.name}
-            className={`px-3 py-1 rounded-lg w-full transition-colors ${
+            className={`px-3 py-1 rounded-lg w-full transition-colors flex items-center gap-2 ${
               isChildActive(child.to)
                 ? "bg-gray-200 text-black"
                 : "text-gray-600 hover:bg-gray-50"
@@ -164,6 +123,16 @@ const SidebarSection: FC<SidebarSectionProps> = ({
             tabIndex={0}
             aria-label={child.name}
           >
+            {child.favicon && (
+              <img
+                src={child.favicon}
+                alt={`${child.name} favicon`}
+                className="w-4 h-4 flex-shrink-0"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            )}
             {child.name}
           </Link>
         ))}
@@ -176,6 +145,52 @@ const SidebarSection: FC<SidebarSectionProps> = ({
 
 const Sidebar: FC = () => {
   const location = useLocation();
+  const { preferences } = useUserPreferences();
+
+  // Convert selectedProjects to the expected format
+  const projects = preferences.selectedProjects.map((project) => ({
+    name: project.projectName || project.folderName,
+    to: `/projects/${project.folderName}`,
+    favicon: project.favicon,
+  }));
+
+  const navigation: NavItem[] = [
+    {
+      type: "link",
+      name: "Home",
+      to: "/",
+      icon: <TablerIcon icon={<IconHome />} size="small" />,
+    },
+    {
+      type: "link",
+      name: "Global rules",
+      to: "/global-rules",
+      icon: <TablerIcon icon={<IconWorldStar />} size="small" />,
+    },
+    {
+      type: "section",
+      name: "Projects",
+      icon: <TablerIcon icon={<IconFolder />} size="small" />,
+      sectionKey: "projects",
+      children: projects.map((project) => ({
+        type: "link",
+        name: project.name,
+        to: project.to,
+        favicon: project.favicon,
+      })),
+    },
+    {
+      type: "section",
+      name: "Templates",
+      icon: <TablerIcon icon={<IconTemplate />} size="small" />,
+      sectionKey: "templates",
+      children: templates.map((template) => ({
+        type: "link",
+        name: template.name,
+        to: template.to,
+      })),
+    },
+  ];
 
   // Helper functions to check if any child is active
   const isProjectActive = projects.some(
