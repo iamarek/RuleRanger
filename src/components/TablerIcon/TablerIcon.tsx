@@ -1,12 +1,13 @@
 import React, { ReactElement } from "react";
 
 export type TablerIconSize = "tiny" | "small" | "big";
-export type TablerIconVariant = "light" | "dark";
+export type TablerIconVariant = "light" | "dark" | "medium";
 
 export type TablerIconProps = {
   size?: TablerIconSize;
   variant?: TablerIconVariant;
   icon: ReactElement;
+  color?: string;
 };
 
 const sizeMap: Record<TablerIconSize, number> = {
@@ -16,19 +17,21 @@ const sizeMap: Record<TablerIconSize, number> = {
 };
 
 const colorMap: Record<TablerIconVariant, string> = {
-  light: "#A5A5A6",
-  dark: "#fff",
+  dark: "#717680",
+  medium: "#A5A5A6",
+  light: "#fff",
 };
 
 const TablerIcon: React.FC<TablerIconProps> = ({
   size = "big",
-  variant = "light",
+  variant = "medium",
   icon,
+  color,
 }) => {
   const iconProps = {
     width: sizeMap[size],
     height: sizeMap[size],
-    color: colorMap[variant],
+    color: color || colorMap[variant],
     strokeWidth: 1.5,
     "aria-hidden": true,
     focusable: false,

@@ -8,6 +8,14 @@ export type DirEntry = {
 
 export type ReadDirResult = DirEntry[] | { error: string };
 
+export type Project = {
+  folderName: string;
+  folderPath: string;
+  favicon?: string;
+  projectName?: string;
+  cursorRules: number;
+};
+
 contextBridge.exposeInMainWorld("api", {
   readDir: async (dirPath: string): Promise<ReadDirResult> => {
     return ipcRenderer.invoke("read-dir", dirPath);
@@ -16,6 +24,14 @@ contextBridge.exposeInMainWorld("api", {
     { folderName: string; folderPath: string; projectName?: string }[]
   > => {
     return ipcRenderer.invoke("find-git-repos");
+  },
+  scanProjectsFullAccess: async (): Promise<Project[]> => {
+    return ipcRenderer.invoke("scan-projects-full-access");
+  },
+  scanProjectsDirectories: async (
+    directories: string[]
+  ): Promise<Project[]> => {
+    return ipcRenderer.invoke("scan-projects-directories", directories);
   },
   getUserPreferences: async (): Promise<{
     directories: string[];

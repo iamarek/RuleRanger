@@ -4,28 +4,16 @@ import Header from "../../components/Header/Header";
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div
-      className="grid min-h-screen grid-cols-[300px_1fr] grid-rows-[90px_1fr] gap-0"
-      style={{ gridTemplateAreas: '"sidebar header" "sidebar main"' }}
-    >
-      <aside
-        className="row-span-2 col-start-1 row-start-1 col-end-2"
-        style={{ gridArea: "sidebar" }}
-      >
+    <div className="flex h-screen">
+      <aside className="w-[300px] flex-shrink-0">
         <Sidebar />
       </aside>
-      <header
-        className="col-start-2 row-start-1 col-end-3"
-        style={{ gridArea: "header" }}
-      >
-        <Header />
-      </header>
-      <main
-        className="col-start-2 row-start-2 col-end-3"
-        style={{ gridArea: "main" }}
-      >
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        <header className="h-[90px] flex-shrink-0">
+          <Header />
+        </header>
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 };

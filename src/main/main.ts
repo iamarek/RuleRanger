@@ -102,55 +102,371 @@ const getProjectName = async (
   return undefined;
 };
 
-// Recursively search for git repos
-const findGitRepos = async (
+// Project type definition
+export type Project = {
+  folderName: string;
+  folderPath: string;
+  favicon?: string;
+  projectName?: string;
+  cursorRules: number;
+};
+
+// Helper to get project name from package.json
+const getProjectNameFromPackageJson = async (
+  projectPath: string
+): Promise<string | undefined> => {
+  try {
+    const packageJsonPath = path.join(projectPath, "package.json");
+    const packageJsonContent = await fs.readFile(packageJsonPath, "utf-8");
+    const packageJson = JSON.parse(packageJsonContent);
+    return packageJson.name;
+  } catch {
+    return undefined;
+  }
+};
+
+// Helper to convert image to base64 data URL
+const imageToBase64 = async (
+  imagePath: string
+): Promise<string | undefined> => {
+  try {
+    const imageBuffer = await fs.readFile(imagePath);
+    const ext = path.extname(imagePath).toLowerCase();
+
+    let mimeType = "image/png"; // default
+    switch (ext) {
+      case ".ico":
+        mimeType = "image/x-icon";
+        break;
+      case ".png":
+        mimeType = "image/png";
+        break;
+      case ".svg":
+        mimeType = "image/svg+xml";
+        break;
+      case ".jpg":
+      case ".jpeg":
+        mimeType = "image/jpeg";
+        break;
+    }
+
+    return `data:${mimeType};base64,${imageBuffer.toString("base64")}`;
+  } catch (error) {
+    console.error(`Error converting image to base64: ${imagePath}`, error);
+    return undefined;
+  }
+};
+
+// Helper to recursively find favicon files
+const getFaviconPath = async (
+  projectPath: string
+): Promise<string | undefined> => {
+  const faviconNames = [
+    "favicon.ico",
+    "favicon.png",
+    "favicon.svg",
+    "favicon.jpg",
+    "favicon.jpeg",
+    "apple-touch-icon.png",
+    "icon.ico",
+    "icon.png",
+    "icon.svg",
+  ];
+
+  const skipDirectories = new Set([
+    "node_modules",
+    ".git",
+    "build",
+    "dist",
+    "out",
+    "target",
+    ".next",
+    ".nuxt",
+    "vendor",
+    "__pycache__",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "coverage",
+    ".coverage",
+    "tmp",
+    "temp",
+    ".tmp",
+    ".temp",
+  ]);
+
+  const searchForFavicon = async (
+    dir: string,
+    depth = 0
+  ): Promise<string | undefined> => {
+    if (depth > 4) return undefined; // Limit search depth to avoid performance issues
+
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+
+      // First, check for favicon files in current directory
+      for (const faviconName of faviconNames) {
+        const faviconPath = path.join(dir, faviconName);
+        try {
+          await fs.access(faviconPath);
+          console.log(`Found favicon: ${faviconPath}`);
+          return faviconPath;
+        } catch {
+          // Continue to next favicon name
+        }
+      }
+
+      // Then search in subdirectories
+      for (const entry of entries) {
+        if (
+          entry.isDirectory() &&
+          !skipDirectories.has(entry.name) &&
+          !entry.name.startsWith(".")
+        ) {
+          const subDir = path.join(dir, entry.name);
+          const found = await searchForFavicon(subDir, depth + 1);
+          if (found) return found;
+        }
+      }
+    } catch {
+      // Directory can't be read, skip
+    }
+
+    return undefined;
+  };
+
+  return searchForFavicon(projectPath);
+};
+
+// Helper to count .mdc files in all .cursor/rules directories recursively throughout the project
+const countCursorRules = async (projectPath: string): Promise<number> => {
+  console.log(`Starting cursor rules count for: ${projectPath}`);
+  const skipDirectories = new Set([
+    "node_modules",
+    ".git",
+    "build",
+    "dist",
+    "out",
+    "target",
+    ".next",
+    ".nuxt",
+    "vendor",
+    "__pycache__",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "coverage",
+    ".coverage",
+    "tmp",
+    "temp",
+    ".tmp",
+    ".temp",
+  ]);
+
+  const searchForCursorRules = async (
+    dir: string,
+    depth = 0
+  ): Promise<number> => {
+    if (depth > 6) return 0; // Limit search depth
+
+    let totalCount = 0;
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+
+      // Check if this directory is .cursor/rules and count .md files
+      if (dir.endsWith(path.join(".cursor", "rules"))) {
+        console.log(`Found .cursor/rules directory: ${dir}`);
+        for (const entry of entries) {
+          if (entry.isFile() && entry.name.endsWith(".mdc")) {
+            console.log(`Found .mdc file: ${entry.name}`);
+            totalCount++;
+          } else if (entry.isDirectory()) {
+            // Recursively count in subdirectories within rules
+            totalCount += await searchForCursorRules(
+              path.join(dir, entry.name),
+              depth + 1
+            );
+          }
+        }
+      } else {
+        // Continue searching in subdirectories
+        for (const entry of entries) {
+          if (entry.isDirectory() && !skipDirectories.has(entry.name)) {
+            const subDir = path.join(dir, entry.name);
+            // Log when we find a .cursor directory
+            if (entry.name === ".cursor") {
+              console.log(`Found .cursor directory: ${subDir}`);
+            }
+            totalCount += await searchForCursorRules(subDir, depth + 1);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(`Error reading directory ${dir}:`, error);
+    }
+
+    return totalCount;
+  };
+
+  const count = await searchForCursorRules(projectPath);
+  console.log(
+    `Project: ${path.basename(projectPath)}, Cursor rules found: ${count}`
+  );
+  return count;
+};
+
+// Enhanced function to find git repos with complete project information
+const findProjectsWithGit = async (
   startDir: string,
   maxDepth = 6
-): Promise<
-  { folderName: string; folderPath: string; projectName?: string }[]
-> => {
-  const results: {
-    folderName: string;
-    folderPath: string;
-    projectName?: string;
-  }[] = [];
+): Promise<Project[]> => {
+  const results: Project[] = [];
   const queue: { dir: string; depth: number }[] = [{ dir: startDir, depth: 0 }];
+
+  // Directories to skip for performance and relevance
+  const skipDirectories = new Set([
+    "node_modules",
+    "Trash",
+    ".Trash",
+    "Library", // macOS system library
+    "System", // macOS system directory
+    "Applications", // macOS applications
+    "bin", // Common binary directories
+    "sbin",
+    "usr",
+    "var",
+    "tmp",
+    "temp",
+    "cache",
+    ".cache",
+    "build",
+    "dist",
+    "out",
+    "target", // Rust/Java build directories
+    ".next", // Next.js build directory
+    ".nuxt", // Nuxt.js build directory
+    "vendor", // Common dependency directories
+    "__pycache__", // Python cache
+    ".pytest_cache",
+    "venv", // Python virtual environments
+    ".venv",
+    "env",
+    ".env",
+  ]);
+
   while (queue.length) {
     const { dir, depth } = queue.shift()!;
     if (depth > maxDepth) continue;
+
     let entries: fsSync.Dirent[];
     try {
       entries = await fs.readdir(dir, { withFileTypes: true });
     } catch {
       continue;
     }
+
+    // Check if this directory has a .git folder
     if (entries.some((e) => e.isDirectory() && e.name === ".git")) {
-      const gitConfigPath = path.join(dir, ".git", "config");
-      const projectName = await getProjectName(gitConfigPath);
+      const folderName = path.basename(dir);
+      const folderPath = dir;
+
+      // Get project name from package.json (preferred) or git config (fallback)
+      let projectName = await getProjectNameFromPackageJson(dir);
+      if (!projectName) {
+        const gitConfigPath = path.join(dir, ".git", "config");
+        projectName = await getProjectName(gitConfigPath);
+      }
+
+      // Check for favicon and convert to base64
+      const faviconPath = await getFaviconPath(dir);
+      const favicon = faviconPath
+        ? await imageToBase64(faviconPath)
+        : undefined;
+      console.log(
+        `Project: ${folderName}, Favicon: ${faviconPath || "none found"}`
+      );
+
+      // Count cursor rules
+      console.log(`About to count cursor rules for: ${folderName}`);
+      const cursorRules = await countCursorRules(dir);
+      console.log(
+        `Finished counting cursor rules for: ${folderName}, count: ${cursorRules}`
+      );
+
       results.push({
-        folderName: path.basename(dir),
-        folderPath: dir,
+        folderName,
+        folderPath,
+        favicon,
         projectName,
+        cursorRules,
       });
+
       continue; // Don't search deeper in this repo
     }
+
+    // Add subdirectories to queue
     for (const entry of entries) {
       if (
         entry.isDirectory() &&
         entry.name !== ".git" &&
-        !entry.name.startsWith(".")
+        !entry.name.startsWith(".") &&
+        !skipDirectories.has(entry.name)
       ) {
         queue.push({ dir: path.join(dir, entry.name), depth: depth + 1 });
       }
     }
   }
+
   return results;
+};
+
+// Recursively search for git repos (legacy function - keeping for compatibility)
+const findGitRepos = async (
+  startDir: string,
+  maxDepth = 6
+): Promise<
+  { folderName: string; folderPath: string; projectName?: string }[]
+> => {
+  const projects = await findProjectsWithGit(startDir, maxDepth);
+  return projects.map(({ folderName, folderPath, projectName }) => ({
+    folderName,
+    folderPath,
+    projectName,
+  }));
 };
 
 ipcMain.handle("find-git-repos", async () => {
   const homeDir = os.homedir();
   return findGitRepos(homeDir);
 });
+
+// Enhanced project scanning with full information
+ipcMain.handle("scan-projects-full-access", async () => {
+  const homeDir = os.homedir();
+  return findProjectsWithGit(homeDir);
+});
+
+ipcMain.handle(
+  "scan-projects-directories",
+  async (_event: IpcMainInvokeEvent, directories: string[]) => {
+    const allProjects: Project[] = [];
+
+    for (const directory of directories) {
+      try {
+        const projects = await findProjectsWithGit(directory);
+        allProjects.push(...projects);
+      } catch (error) {
+        console.error(`Error scanning directory ${directory}:`, error);
+      }
+    }
+
+    return allProjects;
+  }
+);
 
 // --- User Preferences Types and Helpers ---
 type UserPreferences = {

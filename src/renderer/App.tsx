@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent, KeyboardEvent } from "react";
 import { Routes, Route } from "react-router-dom";
 import type { FC } from "react";
-import Home from "./Home";
+import Home from "./Home/Home";
+import { Project } from "../types/global";
 
 type DirEntry = {
   name: string;
@@ -15,26 +16,6 @@ type GitRepo = {
   folderPath: string;
   projectName?: string;
 };
-
-declare global {
-  interface Window {
-    api: {
-      readDir: (dirPath: string) => Promise<ReadDirResult>;
-      findGitRepos: () => Promise<GitRepo[]>;
-      selectDirectory: () => Promise<string | null>;
-      getUserPreferences: () => Promise<{
-        directories: string[];
-        allowFullAccess: boolean;
-        onboardingCompletedAt: string | null;
-      }>;
-      setUserPreferences: (prefs: {
-        directories: string[];
-        allowFullAccess: boolean;
-        onboardingCompletedAt: string | null;
-      }) => Promise<boolean>;
-    };
-  }
-}
 
 const About: FC = () => <div>About Page</div>;
 

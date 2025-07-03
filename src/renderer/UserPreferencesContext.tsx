@@ -5,11 +5,13 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { Project } from "../preload/preload";
 
 export type UserPreferences = {
   directories: string[];
   allowFullAccess: boolean;
   onboardingCompletedAt: string | null;
+  selectedProjects: Project[];
 };
 
 type UserPreferencesContextType = {
@@ -24,6 +26,7 @@ const defaultPreferences: UserPreferences = {
   directories: [],
   allowFullAccess: false,
   onboardingCompletedAt: null,
+  selectedProjects: [],
 };
 
 const UserPreferencesContext = createContext<

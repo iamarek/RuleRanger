@@ -1,6 +1,7 @@
 import React, { useState, ChangeEvent, KeyboardEvent } from "react";
 import { Routes, Route } from "react-router-dom";
 import type { FC } from "react";
+import { Project } from "../types/global";
 
 type DirEntry = {
   name: string;
@@ -31,6 +32,8 @@ declare global {
         allowFullAccess: boolean;
         onboardingCompletedAt: string | null;
       }) => Promise<boolean>;
+      scanProjectsFullAccess: () => Promise<Project[]>;
+      scanProjectsDirectories: (directories: string[]) => Promise<Project[]>;
     };
   }
 }

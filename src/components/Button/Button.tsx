@@ -7,6 +7,7 @@ type ButtonTypes = {
   iconLeft?: ReactElement;
   iconRight?: ReactElement;
   onClick?: () => void;
+  disabled?: boolean;
 };
 
 const Button = ({
@@ -16,6 +17,7 @@ const Button = ({
   iconRight,
   children,
   onClick,
+  disabled,
 }: PropsWithChildren<ButtonTypes>) => {
   const sizeClassMap: Record<ButtonTypes["size"], string> = {
     big: "px-5 py-3 text-base font-medium",
@@ -30,10 +32,13 @@ const Button = ({
 
   return (
     <button
-      className={` flex items-center gap-2 ${sizeClassMap[size]} ${variantClassMap[variant]}`}
+      className={` flex items-center gap-2 ${sizeClassMap[size]} ${
+        variantClassMap[variant]
+      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       tabIndex={0}
       aria-label="button"
       onClick={onClick}
+      disabled={disabled}
     >
       {iconLeft && (
         <TablerIcon

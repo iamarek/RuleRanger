@@ -1,12 +1,12 @@
 import { useState } from "react";
-import Banner from "../components/Banner/Banner";
-import Card from "../components/Card/Card";
-import Heading from "../components/Heading/Heading";
-import RadioGroup, { RadioOption } from "../components/RadioGroup/RadioGroup";
-import DefaultLayout from "../layouts/DefaultLayout/DefaultLayout";
-import Button from "../components/Button/Button";
+import { useUserPreferences } from "../../../useUserPreferences";
+import Card from "../../../../components/Card/Card";
+import Heading from "../../../../components/Heading/Heading";
+import Button from "../../../../components/Button/Button";
 import { IconArrowForward, IconRefresh } from "@tabler/icons-react";
-import { useUserPreferences } from "./useUserPreferences";
+import RadioGroup, {
+  RadioOption,
+} from "../../../../components/RadioGroup/RadioGroup";
 
 const projectSetupOptions: RadioOption[] = [
   {
@@ -85,18 +85,4 @@ const NoProjectsCard = () => {
   );
 };
 
-const Home = () => {
-  return (
-    <DefaultLayout>
-      <Banner
-        title="Welcome to RuleRanger"
-        description="Start your journey with adding your projects"
-      />
-      <div className="pl-10 pr-14 space-y-4">
-        <NoProjectsCard />
-      </div>
-    </DefaultLayout>
-  );
-};
-
-export default Home;
+export default NoProjectsCard;

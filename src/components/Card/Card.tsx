@@ -1,7 +1,14 @@
 import { PropsWithChildren } from "react";
 
-const Card = ({ children }: PropsWithChildren) => (
-  <div className="shadow-card py-5 px-6 rounded-xl bg-white">{children}</div>
+const Card = ({
+  children,
+  className = "",
+}: PropsWithChildren<{ className?: string }>) => (
+  <div
+    className={`shadow-card pt-5 pb-8 px-6 rounded-xl bg-white mb-6 ${className}`}
+  >
+    {children}
+  </div>
 );
 
 export default Card;
