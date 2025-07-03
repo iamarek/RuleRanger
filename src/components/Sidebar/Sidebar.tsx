@@ -157,7 +157,7 @@ const Sidebar: FC = () => {
   const navigation: NavItem[] = [
     {
       type: "link",
-      name: "Home",
+      name: "Dashboard",
       to: "/",
       icon: <TablerIcon icon={<IconHome />} size="small" />,
     },
@@ -167,18 +167,23 @@ const Sidebar: FC = () => {
       to: "/global-rules",
       icon: <TablerIcon icon={<IconWorldStar />} size="small" />,
     },
-    {
-      type: "section",
-      name: "Projects",
-      icon: <TablerIcon icon={<IconFolder />} size="small" />,
-      sectionKey: "projects",
-      children: projects.map((project) => ({
-        type: "link",
-        name: project.name,
-        to: project.to,
-        favicon: project.favicon,
-      })),
-    },
+    // Only include Projects section if there are projects
+    ...(projects.length > 0
+      ? [
+          {
+            type: "section" as const,
+            name: "Projects",
+            icon: <TablerIcon icon={<IconFolder />} size="small" />,
+            sectionKey: "projects" as const,
+            children: projects.map((project) => ({
+              type: "link" as const,
+              name: project.name,
+              to: project.to,
+              favicon: project.favicon,
+            })),
+          },
+        ]
+      : []),
     {
       type: "section",
       name: "Templates",

@@ -16,6 +16,24 @@ export type Project = {
   cursorRules: number;
 };
 
+export type CursorRule = {
+  name: string;
+  filePath: string;
+  description: string | null;
+  lastModified: Date;
+  project: Project;
+};
+
+export type RecentlyUpdatedProject = {
+  project: Project;
+  lastRuleUpdate: Date;
+};
+
+export type DashboardRulesData = {
+  mostRecentlyUpdatedProject: RecentlyUpdatedProject | null;
+  latestRules: CursorRule[];
+};
+
 contextBridge.exposeInMainWorld("api", {
   readDir: async (dirPath: string): Promise<ReadDirResult> => {
     return ipcRenderer.invoke("read-dir", dirPath);
@@ -49,5 +67,8 @@ contextBridge.exposeInMainWorld("api", {
   },
   selectDirectory: async (): Promise<string | null> => {
     return ipcRenderer.invoke("select-directory");
+  },
+  scanCursorRules: async (projects: Project[]): Promise<DashboardRulesData> => {
+    return ipcRenderer.invoke("scan-cursor-rules", projects);
   },
 });

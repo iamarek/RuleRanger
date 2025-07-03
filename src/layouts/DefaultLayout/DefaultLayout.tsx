@@ -12,7 +12,9 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         <header className="h-[90px] flex-shrink-0">
           <Header />
         </header>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="pb-10">{children}</div>
+        </main>
       </div>
     </div>
   );

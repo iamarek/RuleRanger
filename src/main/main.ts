@@ -26,7 +26,7 @@ const isDev: boolean = process.env.NODE_ENV !== "production";
 const createWindow = (): void => {
   mainWindow = new BrowserWindow({
     width: 1000,
-    height: 700,
+    height: 800,
     minWidth: 1000,
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js"),
@@ -526,3 +526,204 @@ ipcMain.handle("select-directory", async () => {
 
   return result.filePaths[0];
 });
+
+// Types for cursor rules scanning
+type CursorRule = {
+  name: string;
+  filePath: string;
+  description: string | null;
+  lastModified: Date;
+  project: Project;
+};
+
+type RecentlyUpdatedProject = {
+  project: Project;
+  lastRuleUpdate: Date;
+};
+
+type DashboardRulesData = {
+  mostRecentlyUpdatedProject: RecentlyUpdatedProject | null;
+  latestRules: CursorRule[];
+};
+
+// Helper function to parse YAML frontmatter and extract description
+const parseYamlFrontmatter = (content: string): string | null => {
+  // Check if content starts with YAML frontmatter
+  if (!content.startsWith("---")) {
+    return null;
+  }
+
+  // Find the closing --- delimiter
+  const lines = content.split("\n");
+  let endIndex = -1;
+
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === "---") {
+      endIndex = i;
+      break;
+    }
+  }
+
+  if (endIndex === -1) {
+    return null;
+  }
+
+  // Extract YAML content between the delimiters
+  const yamlContent = lines.slice(1, endIndex).join("\n");
+
+  // Simple YAML parser for description field
+  // Look for description field and capture only the value on the same line
+  const descriptionMatch = yamlContent.match(/^description:\s*(.*)$/m);
+
+  if (descriptionMatch && descriptionMatch[1]) {
+    const description = descriptionMatch[1].trim();
+    // Return null if description is empty or contains other YAML field names
+    if (description === "" || description.includes(":")) {
+      return null;
+    }
+    return description;
+  }
+
+  return null;
+};
+
+// Helper function to scan cursor rules in a project
+const scanCursorRulesInProject = async (
+  project: Project
+): Promise<CursorRule[]> => {
+  const rules: CursorRule[] = [];
+  const skipDirectories = new Set([
+    "node_modules",
+    ".git",
+    "build",
+    "dist",
+    "out",
+    "target",
+    ".next",
+    ".nuxt",
+    "vendor",
+    "__pycache__",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "coverage",
+    ".coverage",
+    "tmp",
+    "temp",
+    ".tmp",
+    ".temp",
+  ]);
+
+  const searchForRules = async (dir: string, depth = 0): Promise<void> => {
+    if (depth > 6) return; // Limit search depth
+
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+
+      // Check if this directory is .cursor/rules and scan .mdc files
+      if (dir.endsWith(path.join(".cursor", "rules"))) {
+        for (const entry of entries) {
+          if (entry.isFile() && entry.name.endsWith(".mdc")) {
+            const filePath = path.join(dir, entry.name);
+            try {
+              const content = await fs.readFile(filePath, "utf-8");
+              const description = parseYamlFrontmatter(content);
+              const stats = await fs.stat(filePath);
+              rules.push({
+                name: entry.name.replace(".mdc", ""),
+                filePath,
+                description,
+                lastModified: stats.mtime,
+                project,
+              });
+            } catch (error) {
+              console.error(`Error reading rule file ${filePath}:`, error);
+            }
+          } else if (entry.isDirectory()) {
+            // Recursively search in subdirectories within rules (up to 2 levels)
+            if (depth < 2) {
+              await searchForRules(path.join(dir, entry.name), depth + 1);
+            }
+          }
+        }
+      } else {
+        // Continue searching in subdirectories
+        for (const entry of entries) {
+          if (entry.isDirectory() && !skipDirectories.has(entry.name)) {
+            await searchForRules(path.join(dir, entry.name), depth + 1);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error reading directory ${dir}:`, error);
+    }
+  };
+
+  await searchForRules(project.folderPath);
+  return rules;
+};
+
+// IPC handler to scan cursor rules across selected projects
+ipcMain.handle(
+  "scan-cursor-rules",
+  async (
+    _event: IpcMainInvokeEvent,
+    projects: Project[]
+  ): Promise<DashboardRulesData> => {
+    const allRules: CursorRule[] = [];
+    const projectLastUpdates: Map<string, Date> = new Map();
+
+    // Scan all projects for cursor rules
+    for (const project of projects) {
+      try {
+        const rules = await scanCursorRulesInProject(project);
+        allRules.push(...rules);
+
+        // Find the most recent rule update for this project
+        if (rules.length > 0) {
+          const mostRecentInProject = rules.reduce((latest, rule) =>
+            rule.lastModified > latest.lastModified ? rule : latest
+          );
+          projectLastUpdates.set(
+            project.folderPath,
+            mostRecentInProject.lastModified
+          );
+        }
+      } catch (error) {
+        console.error(
+          `Error scanning cursor rules for project ${project.folderName}:`,
+          error
+        );
+      }
+    }
+
+    // Find the project with the most recently updated rule
+    let mostRecentlyUpdatedProject: RecentlyUpdatedProject | null = null;
+    let mostRecentDate = new Date(0);
+
+    for (const [folderPath, lastUpdate] of projectLastUpdates) {
+      if (lastUpdate > mostRecentDate) {
+        mostRecentDate = lastUpdate;
+        const project = projects.find((p) => p.folderPath === folderPath);
+        if (project) {
+          mostRecentlyUpdatedProject = {
+            project,
+            lastRuleUpdate: lastUpdate,
+          };
+        }
+      }
+    }
+
+    // Get the 5 most recently updated rules across all projects
+    const latestRules = allRules
+      .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime())
+      .slice(0, 4);
+
+    return {
+      mostRecentlyUpdatedProject,
+      latestRules,
+    };
+  }
+);

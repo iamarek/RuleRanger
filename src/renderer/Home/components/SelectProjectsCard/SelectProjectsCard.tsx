@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUserPreferences } from "../../../useUserPreferences";
 import { useProjectScanner } from "../../../useProjectScanner";
 import Card from "../../../../components/Card/Card";
@@ -9,16 +10,18 @@ import Text from "../../../../components/Text/Text";
 import { Project } from "../../../../preload/preload";
 
 const SelectProjectsCard = () => {
+  const navigate = useNavigate();
   const { preferences, updatePreferences, resetPreferences } =
     useUserPreferences();
   const { projects, loading, error, scanProjects } = useProjectScanner();
   const [checkedProjects, setCheckedProjects] = useState<Project[]>([]);
 
-  const handleAddProjects = () => {
-    updatePreferences({
+  const handleAddProjects = async () => {
+    await updatePreferences({
       selectedProjects: [...preferences.selectedProjects, ...checkedProjects],
       onboardingCompletedAt: new Date().toISOString(),
     });
+    navigate("/", { replace: true });
   };
 
   useEffect(() => {
