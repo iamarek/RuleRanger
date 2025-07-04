@@ -4,6 +4,7 @@ import type { FC } from "react";
 import Home from "./Home/Home";
 import Dashboard from "./Dashboard/Dashboard";
 import Onboarding from "./Onboarding/Onboarding";
+import Project from "./Project/Project";
 import Loading from "../components/Loading/Loading";
 import { useUserPreferences } from "./useUserPreferences";
 
@@ -57,7 +58,7 @@ const App: FC = () => {
         }
       />
       <Route path="/about" element={<About />} />
-      <Route path="/projects/:projectName" element={<div>Project Page</div>} />
+      <Route path="/projects/:projectId" element={<Project />} />
       <Route path="/global-rules" element={<div>Global Rules Page</div>} />
       <Route
         path="/templates/:templateName"

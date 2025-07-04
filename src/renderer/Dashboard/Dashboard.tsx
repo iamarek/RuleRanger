@@ -68,7 +68,7 @@ const Dashboard: FC = () => {
           offset={false}
         >
           <Link
-            to={`/projects/${data?.mostRecentlyUpdatedProject?.project.folderName}`}
+            to={`/projects/${data?.mostRecentlyUpdatedProject?.project.id}`}
             className="flex max-w-[400px]"
           >
             <Card className="w-full !pb-5 hover:translate-y-[-2px] transition-all duration-200">
@@ -133,7 +133,7 @@ const Dashboard: FC = () => {
                   <div className="grid grid-cols-2 gap-6">
                     {data.latestRules.map((rule, index) => (
                       <Link
-                        to={`/projects/${rule.project.folderName}/${rule.filePath}`}
+                        to={`/projects/${rule.project.id}/${rule.filePath}`}
                         key={`${rule.project.folderPath}-${rule.name}-${index}`}
                         className="border group border-gray-200 rounded-lg p-4 flex flex-col hover:border-gray-400 hover:bg-gray-50/50 transition-all duration-200"
                       >

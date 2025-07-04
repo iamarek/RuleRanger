@@ -151,7 +151,7 @@ const Sidebar: FC = () => {
   // Convert selectedProjects to the expected format
   const projects = preferences.selectedProjects.map((project) => ({
     name: project.projectName || project.folderName,
-    to: `/projects/${project.folderName}`,
+    to: `/projects/${project.id}`,
     favicon: project.favicon,
   }));
 
