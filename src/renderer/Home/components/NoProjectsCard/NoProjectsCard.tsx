@@ -26,7 +26,6 @@ const NoProjectsCard = () => {
   const [selectedOption, setSelectedOption] = useState("scan");
   const { preferences, setPreferences, resetPreferences } =
     useUserPreferences();
-  console.log({ preferences });
 
   const handleSelection = async () => {
     if (selectedOption === "scan") {
@@ -55,14 +54,6 @@ const NoProjectsCard = () => {
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-start">
           <Heading variant="h2">How do you want to link your projects?</Heading>
-          <Button
-            size="regular"
-            variant="secondary"
-            iconRight={<IconRefresh size={16} />}
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
         </div>
         <RadioGroup
           options={projectSetupOptions}

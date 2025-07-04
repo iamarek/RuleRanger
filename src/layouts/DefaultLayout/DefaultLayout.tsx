@@ -2,7 +2,11 @@ import { PropsWithChildren } from "react";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 
-const DefaultLayout = ({ children }: PropsWithChildren) => {
+type DefaultLayoutProps = PropsWithChildren & {
+  header?: React.ReactNode;
+};
+
+const DefaultLayout = ({ children, header }: DefaultLayoutProps) => {
   return (
     <div className="flex h-screen">
       <aside className="w-[300px] flex-shrink-0">
@@ -10,7 +14,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
       </aside>
       <div className="flex-1 flex flex-col">
         <header className="h-[90px] flex-shrink-0">
-          <Header />
+          <Header content={header} />
         </header>
         <main className="flex-1 overflow-y-auto">
           <div className="pb-10">{children}</div>

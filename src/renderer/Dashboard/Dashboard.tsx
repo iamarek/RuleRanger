@@ -8,8 +8,13 @@ import Card from "../../components/Card/Card";
 import Heading from "../../components/Heading/Heading";
 import Text from "../../components/Text/Text";
 import { Link } from "react-router-dom";
-import { IconPencil, IconPencilCode } from "@tabler/icons-react";
+import {
+  IconFolderPlus,
+  IconPencil,
+  IconPencilCode,
+} from "@tabler/icons-react";
 import TablerIcon from "../../components/TablerIcon/TablerIcon";
+import Button from "../../components/Button/Button";
 
 const Dashboard: FC = () => {
   const { preferences } = useUserPreferences();
@@ -55,7 +60,19 @@ const Dashboard: FC = () => {
   }
 
   return (
-    <DefaultLayout>
+    <DefaultLayout
+      header={
+        <div>
+          <Button
+            variant="secondary"
+            size="regular"
+            iconLeft={<IconFolderPlus />}
+          >
+            Add new project
+          </Button>
+        </div>
+      }
+    >
       <div className="flex flex-col h-full max-h-full">
         <Banner
           title="Jump back in"

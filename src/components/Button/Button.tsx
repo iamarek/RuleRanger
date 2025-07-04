@@ -27,7 +27,7 @@ const Button = ({
   const variantClassMap: Record<ButtonTypes["variant"], string> = {
     primary: "button-shadow bg-gray-darkest text-white rounded-lg",
     secondary:
-      "button-shadow-light bg-white text-gray-darkest rounded-lg border border-gray-light",
+      "button-shadow-light bg-white text-gray-darkest rounded-lg border border-gray-light hover:bg-gray-50/50 hover:border-gray-400 transition-all duration-200",
   };
 
   return (
@@ -44,7 +44,7 @@ const Button = ({
         <TablerIcon
           icon={iconLeft}
           size="small"
-          variant={variant === "primary" ? "dark" : "light"}
+          variant={variant === "primary" ? "light" : "dark"}
         />
       )}
       {children}
@@ -52,7 +52,7 @@ const Button = ({
         <TablerIcon
           icon={iconRight}
           size="small"
-          variant={variant === "primary" ? "dark" : "light"}
+          variant={variant === "primary" ? "light" : "dark"}
         />
       )}
     </button>

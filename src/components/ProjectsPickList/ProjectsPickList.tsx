@@ -10,7 +10,7 @@ type ProjectsPickListType = {
 
 const ProjectsPickList = ({
   projects,
-  checkedProjects,
+  checkedProjects = [],
   setCheckedProjects,
 }: ProjectsPickListType) => {
   console.log({ checkedProjects });
@@ -21,7 +21,7 @@ const ProjectsPickList = ({
           key={project.folderPath}
           project={project}
           onCheckboxClick={() => {
-            if (checkedProjects.includes(project)) {
+            if (checkedProjects?.includes(project)) {
               setCheckedProjects(
                 checkedProjects.filter(
                   (p) => p.folderPath !== project.folderPath
@@ -31,7 +31,7 @@ const ProjectsPickList = ({
               setCheckedProjects([...checkedProjects, project]);
             }
           }}
-          checked={checkedProjects.includes(project)}
+          checked={checkedProjects?.includes(project) || false}
         />
       ))}
     </div>

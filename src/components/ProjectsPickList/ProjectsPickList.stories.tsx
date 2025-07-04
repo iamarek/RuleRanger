@@ -1,9 +1,27 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 import ProjectsPickList from "./ProjectsPickList";
+import { Project } from "../../main/main";
 
 const meta: Meta<typeof ProjectsPickList> = {
   title: "UI/ProjectsPickList",
   component: ProjectsPickList,
+  decorators: [
+    (Story, context) => {
+      const [checkedProjects, setCheckedProjects] = useState<Project[]>([]);
+
+      return (
+        <Story
+          {...context}
+          args={{
+            ...context.args,
+            checkedProjects,
+            setCheckedProjects,
+          }}
+        />
+      );
+    },
+  ],
 };
 export default meta;
 

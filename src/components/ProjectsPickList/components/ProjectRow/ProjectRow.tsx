@@ -1,6 +1,6 @@
 import { Project } from "../../../../main/main";
 import Text from "../../../Text/Text";
-import { convertUserPathToIcon } from "./helpers";
+import { splitUserPath } from "./helpers";
 import BadgeGroup from "../../../BadgeGroup/BadgeGroup";
 import { Checkbox } from "../../../Checkbox/Checkbox";
 
@@ -11,7 +11,7 @@ type ProjectRowType = {
 };
 
 const ProjectRow = ({ project, onCheckboxClick, checked }: ProjectRowType) => {
-  const [projectPath, userName] = convertUserPathToIcon(project.folderPath);
+  const [userName, projectPath] = splitUserPath(project.folderPath);
 
   return (
     <div

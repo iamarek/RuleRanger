@@ -10,9 +10,11 @@ import {
   IconTemplate,
   IconHome,
   IconWorldStar,
+  IconLogout,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
 import { useUserPreferences } from "../../renderer/useUserPreferences";
+import Button from "../Button/Button";
 
 const templates = [
   { name: "Template 1", to: "/templates/template1" },
@@ -145,7 +147,7 @@ const SidebarSection: FC<SidebarSectionProps> = ({
 
 const Sidebar: FC = () => {
   const location = useLocation();
-  const { preferences } = useUserPreferences();
+  const { preferences, resetPreferences } = useUserPreferences();
 
   // Convert selectedProjects to the expected format
   const projects = preferences.selectedProjects.map((project) => ({
@@ -267,6 +269,16 @@ const Sidebar: FC = () => {
             return null;
           })}
         </nav>
+      </div>
+      <div className="mt-auto">
+        <Button
+          variant="secondary"
+          size="regular"
+          iconLeft={<IconLogout />}
+          onClick={resetPreferences}
+        >
+          Reset
+        </Button>
       </div>
     </div>
   );

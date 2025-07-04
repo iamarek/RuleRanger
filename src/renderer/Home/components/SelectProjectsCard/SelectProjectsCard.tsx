@@ -11,8 +11,7 @@ import { Project } from "../../../../preload/preload";
 
 const SelectProjectsCard = () => {
   const navigate = useNavigate();
-  const { preferences, updatePreferences, resetPreferences } =
-    useUserPreferences();
+  const { preferences, updatePreferences } = useUserPreferences();
   const { projects, loading, error, scanProjects } = useProjectScanner();
   const [checkedProjects, setCheckedProjects] = useState<Project[]>([]);
 
@@ -52,7 +51,6 @@ const SelectProjectsCard = () => {
 
   return (
     <Card className="!px-0">
-      <button onClick={() => resetPreferences()}>Reset</button>
       <div className="flex flex-col">
         <div className="px-6">
           <Heading variant="h2">
