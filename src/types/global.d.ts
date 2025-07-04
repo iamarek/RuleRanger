@@ -1,10 +1,4 @@
-export type Project = {
-  folderName: string;
-  folderPath: string;
-  favicon?: string;
-  projectName?: string;
-  cursorRules: number;
-};
+import { Project, UserPreferences } from "../preload/preload";
 
 declare global {
   interface Window {
@@ -19,16 +13,8 @@ declare global {
       >;
       scanProjectsFullAccess: () => Promise<Project[]>;
       scanProjectsDirectories: (directories: string[]) => Promise<Project[]>;
-      getUserPreferences: () => Promise<{
-        directories: string[];
-        allowFullAccess: boolean;
-        onboardingCompletedAt: string | null;
-      }>;
-      setUserPreferences: (prefs: {
-        directories: string[];
-        allowFullAccess: boolean;
-        onboardingCompletedAt: string | null;
-      }) => Promise<boolean>;
+      getUserPreferences: () => Promise<UserPreferences>;
+      setUserPreferences: (prefs: UserPreferences) => Promise<boolean>;
       selectDirectory: () => Promise<string | null>;
     };
   }

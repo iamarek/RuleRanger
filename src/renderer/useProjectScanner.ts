@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useUserPreferences } from "./useUserPreferences";
-import { Project } from "../types/global";
+import { Project } from "../preload/preload";
 
 type ProjectScannerState = {
   projects: Project[];

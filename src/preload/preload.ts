@@ -9,11 +9,38 @@ export type DirEntry = {
 export type ReadDirResult = DirEntry[] | { error: string };
 
 export type Project = {
+  id: string;
   folderName: string;
   folderPath: string;
   favicon?: string;
   projectName?: string;
   cursorRules: number;
+};
+
+export type UserPreferences = {
+  directories: string[];
+  allowFullAccess: boolean;
+  onboardingCompletedAt: string | null;
+  selectedProjects: Project[];
+};
+
+export const generateUniqueProjectId = (
+  projectName: string | undefined,
+  folderName: string,
+  existingProjects: Project[]
+): string => {
+  const baseName = projectName || folderName;
+  const existingIds = existingProjects.map((p) => p.id);
+
+  let counter = 0;
+  let candidateId = `${baseName}-${counter}`;
+
+  while (existingIds.includes(candidateId)) {
+    counter++;
+    candidateId = `${baseName}-${counter}`;
+  }
+
+  return candidateId;
 };
 
 export type CursorRule = {
@@ -51,18 +78,10 @@ contextBridge.exposeInMainWorld("api", {
   ): Promise<Project[]> => {
     return ipcRenderer.invoke("scan-projects-directories", directories);
   },
-  getUserPreferences: async (): Promise<{
-    directories: string[];
-    allowFullAccess: boolean;
-    onboardingCompletedAt: string | null;
-  }> => {
+  getUserPreferences: async (): Promise<UserPreferences> => {
     return ipcRenderer.invoke("get-user-preferences");
   },
-  setUserPreferences: async (prefs: {
-    directories: string[];
-    allowFullAccess: boolean;
-    onboardingCompletedAt: string | null;
-  }): Promise<boolean> => {
+  setUserPreferences: async (prefs: UserPreferences): Promise<boolean> => {
     return ipcRenderer.invoke("set-user-preferences", prefs);
   },
   selectDirectory: async (): Promise<string | null> => {

@@ -12,7 +12,6 @@ import {
   IconWorldStar,
   IconLogout,
 } from "@tabler/icons-react";
-import { NavLink } from "react-router-dom";
 import { useUserPreferences } from "../../renderer/useUserPreferences";
 import Button from "../Button/Button";
 

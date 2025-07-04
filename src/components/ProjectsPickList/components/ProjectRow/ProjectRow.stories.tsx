@@ -15,6 +15,7 @@ export const Default: Story = {
 
 Default.args = {
   project: {
+    id: "9admin-deploy-0",
     folderName: "9admin",
     folderPath: "/Users/iamarek/Projects/9admin",
     favicon:
@@ -30,6 +31,7 @@ export const EmptyRules: Story = {
 
 EmptyRules.args = {
   project: {
+    id: "9admin-deploy-1",
     folderName: "9admin",
     folderPath: "/Users/iamarek/Projects/9admin",
     favicon:
@@ -45,6 +47,7 @@ export const NotStandardPath: Story = {
 
 NotStandardPath.args = {
   project: {
+    id: "9admin-deploy-2",
     folderName: "9admin",
     folderPath: "/Us123ers/iamarek/Projects/9admin",
     favicon:

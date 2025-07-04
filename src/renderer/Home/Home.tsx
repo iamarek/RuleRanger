@@ -18,8 +18,6 @@ const Home = () => {
   const isSetupComplete =
     preferences.directories.length > 0 || preferences.allowFullAccess;
 
-  console.log({ preferences, isSetupComplete });
-
   return (
     <DefaultLayout>
       <div className="flex flex-col h-full max-h-full">

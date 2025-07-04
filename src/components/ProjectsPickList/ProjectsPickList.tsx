@@ -13,7 +13,6 @@ const ProjectsPickList = ({
   checkedProjects = [],
   setCheckedProjects,
 }: ProjectsPickListType) => {
-  console.log({ checkedProjects });
   return (
     <div className="flex flex-col">
       {projects?.map((project) => (

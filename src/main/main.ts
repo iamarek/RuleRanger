@@ -104,11 +104,31 @@ const getProjectName = async (
 
 // Project type definition
 export type Project = {
+  id: string;
   folderName: string;
   folderPath: string;
   favicon?: string;
   projectName?: string;
   cursorRules: number;
+};
+
+export const generateUniqueProjectId = (
+  projectName: string | undefined,
+  folderName: string,
+  existingProjects: Project[]
+): string => {
+  const baseName = projectName || folderName;
+  const existingIds = existingProjects.map((p) => p.id);
+
+  let counter = 0;
+  let candidateId = `${baseName}-${counter}`;
+
+  while (existingIds.includes(candidateId)) {
+    counter++;
+    candidateId = `${baseName}-${counter}`;
+  }
+
+  return candidateId;
 };
 
 // Helper to get project name from package.json
@@ -279,10 +299,8 @@ const countCursorRules = async (projectPath: string): Promise<number> => {
 
       // Check if this directory is .cursor/rules and count .md files
       if (dir.endsWith(path.join(".cursor", "rules"))) {
-        console.log(`Found .cursor/rules directory: ${dir}`);
         for (const entry of entries) {
           if (entry.isFile() && entry.name.endsWith(".mdc")) {
-            console.log(`Found .mdc file: ${entry.name}`);
             totalCount++;
           } else if (entry.isDirectory()) {
             // Recursively count in subdirectories within rules
@@ -313,50 +331,42 @@ const countCursorRules = async (projectPath: string): Promise<number> => {
   };
 
   const count = await searchForCursorRules(projectPath);
-  console.log(
-    `Project: ${path.basename(projectPath)}, Cursor rules found: ${count}`
-  );
+
   return count;
 };
 
-// Enhanced function to find git repos with complete project information
+// Enhanced project scanning with full information
 const findProjectsWithGit = async (
   startDir: string,
-  maxDepth = 6
+  maxDepth = 6,
+  existingProjects: Project[] = []
 ): Promise<Project[]> => {
   const results: Project[] = [];
-  const queue: { dir: string; depth: number }[] = [{ dir: startDir, depth: 0 }];
-
-  // Directories to skip for performance and relevance
   const skipDirectories = new Set([
     "node_modules",
-    "Trash",
-    ".Trash",
-    "Library", // macOS system library
-    "System", // macOS system directory
-    "Applications", // macOS applications
-    "bin", // Common binary directories
-    "sbin",
-    "usr",
-    "var",
-    "tmp",
-    "temp",
-    "cache",
-    ".cache",
+    ".git",
     "build",
     "dist",
     "out",
-    "target", // Rust/Java build directories
-    ".next", // Next.js build directory
-    ".nuxt", // Nuxt.js build directory
-    "vendor", // Common dependency directories
-    "__pycache__", // Python cache
+    "target",
+    ".next",
+    ".nuxt",
+    "vendor",
+    "__pycache__",
     ".pytest_cache",
-    "venv", // Python virtual environments
+    "venv",
     ".venv",
     "env",
     ".env",
+    "coverage",
+    ".coverage",
+    "tmp",
+    "temp",
+    ".tmp",
+    ".temp",
   ]);
+
+  const queue: { dir: string; depth: number }[] = [{ dir: startDir, depth: 0 }];
 
   while (queue.length) {
     const { dir, depth } = queue.shift()!;
@@ -386,18 +396,13 @@ const findProjectsWithGit = async (
       const favicon = faviconPath
         ? await imageToBase64(faviconPath)
         : undefined;
-      console.log(
-        `Project: ${folderName}, Favicon: ${faviconPath || "none found"}`
-      );
-
-      // Count cursor rules
-      console.log(`About to count cursor rules for: ${folderName}`);
       const cursorRules = await countCursorRules(dir);
-      console.log(
-        `Finished counting cursor rules for: ${folderName}, count: ${cursorRules}`
-      );
 
       results.push({
+        id: generateUniqueProjectId(projectName, folderName, [
+          ...existingProjects,
+          ...results,
+        ]),
         folderName,
         folderPath,
         favicon,
@@ -457,7 +462,7 @@ ipcMain.handle(
 
     for (const directory of directories) {
       try {
-        const projects = await findProjectsWithGit(directory);
+        const projects = await findProjectsWithGit(directory, 6, allProjects);
         allProjects.push(...projects);
       } catch (error) {
         console.error(`Error scanning directory ${directory}:`, error);
@@ -473,7 +478,7 @@ type UserPreferences = {
   directories: string[];
   allowFullAccess: boolean;
   onboardingCompletedAt: string | null;
-  // Add more fields as needed
+  selectedProjects: Project[];
 };
 
 const getPreferencesPath = (): string => {
@@ -491,6 +496,7 @@ const readUserPreferences = async (): Promise<UserPreferences> => {
       directories: [],
       allowFullAccess: false,
       onboardingCompletedAt: null,
+      selectedProjects: [],
     };
   }
 };

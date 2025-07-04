@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import ProjectsPickList from "./ProjectsPickList";
-import { Project } from "../../main/main";
+import { Project } from "../../preload/preload";
 
 const meta: Meta<typeof ProjectsPickList> = {
   title: "UI/ProjectsPickList",
@@ -34,6 +34,7 @@ export const Default: Story = {
 Default.args = {
   projects: [
     {
+      id: "test-0",
       folderPath: "/Users/arek/Desktop/test",
       folderName: "test",
       cursorRules: 0,
@@ -41,6 +42,7 @@ Default.args = {
       favicon: "https://www.google.com/favicon.ico",
     },
     {
+      id: "test2-0",
       folderPath: "/Users/arek/Desktop/test2",
       folderName: "test2",
       cursorRules: 1,
@@ -48,6 +50,7 @@ Default.args = {
       favicon: "https://www.google.com/favicon.ico",
     },
     {
+      id: "test3-0",
       folderPath: "/Users/arek/Desktop/test3",
       folderName: "test3",
       cursorRules: 2,

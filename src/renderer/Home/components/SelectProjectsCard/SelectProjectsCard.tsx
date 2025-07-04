@@ -8,6 +8,7 @@ import ProjectsPickList from "../../../../components/ProjectsPickList/ProjectsPi
 import Button from "../../../../components/Button/Button";
 import Text from "../../../../components/Text/Text";
 import { Project } from "../../../../preload/preload";
+import { generateUniqueProjectId } from "../../../helpers/projectIdHelpers";
 
 const SelectProjectsCard = () => {
   const navigate = useNavigate();
@@ -16,8 +17,28 @@ const SelectProjectsCard = () => {
   const [checkedProjects, setCheckedProjects] = useState<Project[]>([]);
 
   const handleAddProjects = async () => {
+    const projectsWithoutIds = checkedProjects.map(
+      ({ id, ...project }) => project
+    );
+
+    const projectsWithIds: Project[] = [];
+    const allExistingProjects = [...preferences.selectedProjects];
+
+    projectsWithoutIds.forEach((project) => {
+      const newProject = {
+        ...project,
+        id: generateUniqueProjectId(
+          project.projectName,
+          project.folderName,
+          allExistingProjects
+        ),
+      };
+      projectsWithIds.push(newProject);
+      allExistingProjects.push(newProject);
+    });
+
     await updatePreferences({
-      selectedProjects: [...preferences.selectedProjects, ...checkedProjects],
+      selectedProjects: [...preferences.selectedProjects, ...projectsWithIds],
       onboardingCompletedAt: new Date().toISOString(),
     });
     navigate("/", { replace: true });

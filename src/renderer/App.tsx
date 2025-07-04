@@ -17,7 +17,7 @@ const ProtectedRoute: FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   const isOnboardingComplete = preferences.onboardingCompletedAt !== null;
-  console.log(isOnboardingComplete);
+
   return isOnboardingComplete ? (
     <>{children}</>
   ) : (

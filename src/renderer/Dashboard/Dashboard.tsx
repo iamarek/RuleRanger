@@ -47,18 +47,6 @@ const Dashboard: FC = () => {
     }
   };
 
-  // Debug logging
-  if (data?.latestRules && data.latestRules.length > 0) {
-    console.log(
-      "Latest rules data:",
-      data.latestRules.map((rule) => ({
-        name: rule.name,
-        description: rule.description,
-        hasDescription: rule.description !== null,
-      }))
-    );
-  }
-
   return (
     <DefaultLayout
       header={

@@ -46,7 +46,6 @@ const NoProjectsCard = () => {
 
   const handleReset = async () => {
     await resetPreferences();
-    console.log("Preferences reset to default state");
   };
 
   return (
