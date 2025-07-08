@@ -9,7 +9,7 @@
     "dev": "concurrently \"webpack --config webpack.main.config.js --watch\" \"webpack --config webpack.preload.config.js --watch\" \"webpack serve --config webpack.renderer.config.js\" \"wait-on dist/renderer/index.js && electron .\"",
     "build": "webpack --config webpack.main.config.js && webpack --config webpack.preload.config.js && webpack --config webpack.renderer.config.js",
     "start": "electron .",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "nvm use && storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {

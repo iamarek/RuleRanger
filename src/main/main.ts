@@ -733,3 +733,29 @@ ipcMain.handle(
     };
   }
 );
+
+// IPC handler to scan cursor rules for a single project
+ipcMain.handle(
+  "scan-project-cursor-rules",
+  async (
+    _event: IpcMainInvokeEvent,
+    projectId: string,
+    projects: Project[]
+  ): Promise<CursorRule[]> => {
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) {
+      throw new Error(`Project with ID ${projectId} not found`);
+    }
+
+    try {
+      const rules = await scanCursorRulesInProject(project);
+      return rules;
+    } catch (error) {
+      console.error(
+        `Error scanning cursor rules for project ${project.folderName}:`,
+        error
+      );
+      throw error;
+    }
+  }
+);

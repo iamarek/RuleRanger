@@ -7,6 +7,7 @@ import Onboarding from "./Onboarding/Onboarding";
 import Project from "./Project/Project";
 import Loading from "../components/Loading/Loading";
 import { useUserPreferences } from "./useUserPreferences";
+import Rule from "./Rule/Rule";
 
 const About: FC = () => <div>About Page</div>;
 
@@ -59,6 +60,7 @@ const App: FC = () => {
       />
       <Route path="/about" element={<About />} />
       <Route path="/projects/:projectId" element={<Project />} />
+      <Route path="/projects/:projectId/rules/:ruleId" element={<Rule />} />
       <Route path="/global-rules" element={<div>Global Rules Page</div>} />
       <Route
         path="/templates/:templateName"

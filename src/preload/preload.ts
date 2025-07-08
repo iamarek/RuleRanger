@@ -90,4 +90,10 @@ contextBridge.exposeInMainWorld("api", {
   scanCursorRules: async (projects: Project[]): Promise<DashboardRulesData> => {
     return ipcRenderer.invoke("scan-cursor-rules", projects);
   },
+  scanProjectCursorRules: async (
+    projectId: string,
+    projects: Project[]
+  ): Promise<CursorRule[]> => {
+    return ipcRenderer.invoke("scan-project-cursor-rules", projectId, projects);
+  },
 });
